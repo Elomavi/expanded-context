@@ -1,0 +1,61 @@
+musicplayerfile = "level/vvvvvvmusic.vvv"
+			currentmusic_file = m
+			local audio = music_get_audio(musicplayerfile, carg1)
+			ved_printf(tostring(musicplayerfile), love.graphics.getWidth()-(228-8), 8+(24*12)+4, 128-16, "center")
+			currentmusic = carg1
+			local current_audio = music_get_audio(currentmusic_file, carg1)
+			local cura_y = 8+(24*13)+16
+			local width = 568
+			if s.psmallerscreen then
+				width = width - 128 + 16
+			end
+			if audio == nil then
+				hoverdraw(image.sound_play, love.graphics.getWidth()-(56+16), cura_y, 16, 16)
+				if nodialog and not mousepressed and love.mouse.isDown("l") then
+					if mouseon(love.graphics.getWidth()-(56+16), cura_y, 16, 16) then
+						-- Load and Play the song...
+						assetsmenu_vvvvvvfolder = levelsfolder .. dirsep .. editingmap
+						local success, error = loadvvvvvvmusic("level/vvvvvvmusic.vvv")
+						currentmusic_file = musicplayerfile
+						audio = music_get_audio(musicplayerfile, carg1)
+						local success = false
+						if audio ~= nil then
+							success = playmusic(musicplayerfile, m)
+						end
+
+						if not success then
+							dialog.create(soundviewer and L.SOUNDPLAYERROR or L.MUSICPLAYERROR)
+						end
+					mousepressed = true
+					end
+				end
+			else
+				hoverdraw(currentmusic_paused and image.sound_play or image.sound_pause, love.graphics.getWidth()-(56+32), cura_y, 16, 16)
+				hoverdraw(image.sound_stop, love.graphics.getWidth()-(56+16), cura_y, 16, 16)
+				hoverdraw(image.sound_rewind, love.graphics.getWidth()-(56-0), cura_y, 16, 16)
+				local elapsed = current_audio:tell()
+				local duration = current_audio:getDuration()
+				if duration ~= nil and duration ~= 0 then
+					-- LÖVE can sometimes fail to reset the time to 0 when looping if we started playing close to the end
+					elapsed = elapsed % duration
+				end
+						if nodialog and not mousepressed and love.mouse.isDown("l") then
+					if mouseon(love.graphics.getWidth()-(60+32), cura_y, 16, 16) then
+						-- Play/pause
+						if currentmusic_paused then
+							resumemusic()
+						else
+							pausemusic()
+						end
+						mousepressed = true
+					elseif mouseon(love.graphics.getWidth()-(60+16), cura_y, 16, 16) then
+						-- Stop
+						stopmusic()
+						mousepressed = true
+					elseif mouseon(love.graphics.getWidth()-(60+0), cura_y, 16, 16) then
+						-- Rewind
+						current_audio:seek(0)
+						mousepressed = true
+					end
+				end
+			end
